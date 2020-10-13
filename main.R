@@ -65,7 +65,7 @@ bin_to_ascii <- function(b){
 # have one of two different autocorrelations for a certain number of samples.
 ts_generation <- function(x, n, p0, p1){
   # x is the vector of binary values
-  # n is the number of samples for each bit of ts data
+  # n is the number of samples of ts data for each bit
   # p0 is the parameter associated with a zero
   # p1 is the parameter associated with a one
   
@@ -77,24 +77,45 @@ ts_generation <- function(x, n, p0, p1){
 }
 
 # a function to take a time series object and return 0 or 1 based on the PACF
-ts_to_bin <- function(x, p0, p1){
+ts_to_bit <- function(x, p0, p1){
   p <- pacf(x)
   p <- p$acf[1]
   dist_0 <- abs(p - p0)
   dist_1 <- abs(p - p1)
-  bin_out <- ifelse(dist_1 < dist_0, 1, 0)
-  return(bin_out)
+  bit_out <- ifelse(dist_1 < dist_0, 1, 0)
+  return(bit_out)
 }
 
 # a wrapper function for the above function that converts the ts into binary piece by pieve
-
 ts_to_bin_converter <- function(x, n, p0, p1){
   # x is the ts
   # n is the size of each chunk that represents a single binary digit
+  bin_out <- numeric()
+  indices <- seq(1, length(x), n)
+  for(i in indices){
+    x_current <- x[i:(i+99)]
+    bit_current <- ts_to_bit(x_current, p0, p1)
+    bin_out <- append(bin_out, bit_current)
+  }
+  return(bin_out)
 }
 
 ################################ Diagnostics #################################
 
-# test the ts_to_bin() function to check the error rate for combinations of 
+# test the ts_to_bit() function to check the error rate for combinations of 
 # p0 and p1 that are separated by different amounts.
 
+################################ Test Message ################################
+
+# Conversion Parameters:
+n <- 1000
+p0 <- 0.5
+p1 <- 0.3
+
+test_message <- "The crow flies at midnight."
+binary_version <- ascii_to_bin(test_message)
+ts_data <- ts_generation(binary_version, n, p0, p1)
+
+binary_decode_version <- ts_to_bin_converter(ts_data, n, p0, p1)
+decode_message <- bin_to_ascii(binary_decode_version)
+cat(decode_message)
