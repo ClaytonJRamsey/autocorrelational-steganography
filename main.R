@@ -104,6 +104,23 @@ ts_to_bin_converter <- function(x, n, p0, p1){
 
 # test the ts_to_bit() function to check the error rate for combinations of 
 # p0 and p1 that are separated by different amounts.
+n <- 100 # samples per bit
+k <- 100 # no. of bits
+b <- sample(c(0, 1), k, replace = TRUE)
+p1seq <- p0seq <- seq(0.1, 0.9, 0.1)
+param0 <- param1 <- error_rate <- numeric()
+
+for(p0 in p0seq){
+  for(p1 in p1seq){
+    param0 <- append(param0, p0)
+    param1 <- append(param1, p1)
+    t <- ts_generation(b, n, p0, p1)
+    b_new <- ts_to_bin_converter(t, n, p0, p1)
+    error_r <- sum(b != b_new)/k
+    error_rate <- append(error_rate, error_r)
+  }
+}
+e_r_results <- data.frame(param0, param1, error_rate)
 
 ################################ Test Message ################################
 
